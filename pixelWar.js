@@ -87,7 +87,7 @@ const baseUrl = 'https://pixel-api.codenestedu.fr';
             if (reponse.ok) {
                 const data = await reponse.json();
                 if (data.tempsAttente > 0) {
-                    waitTimeDiv.textContent = `Veuillez patienter ${data.tempsAttente} secondes`;
+                    waitTimeDiv.textContent = `Veuillez patienter ${data.tempsAttente/1000} secondes`;
                 } else {
                     waitTimeDiv.textContent = "Vous pouvez modifier un pixel";
                 }
