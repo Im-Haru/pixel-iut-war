@@ -1,0 +1,98 @@
+
+.test {
+    text-align: center;
+    background-color: #1a23b9;
+    color: white;
+    width: 100%; 
+    padding: 5px 0;
+    margin-bottom: 40px;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;    
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.main-container {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    width: 100%;
+    justify-content: center;
+}
+
+#pixel-grid {
+    display: grid;
+    width: 80vmin;
+    height: 80vmin;
+    background-color: #000000;
+}
+
+.pixel {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.pixel:hover {
+    outline: 1px solid #ffffff;
+    z-index: 10;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    width: 450px;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.panel-header {
+    background-color: #1a23b9;
+    color: white;
+    width: 100%;
+    text-align: center;
+    padding: 8px 0;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+input[type="text"] {
+    padding: 5px;
+    text-align: center;
+    width: 250px;
+    font-size: 1em;
+}
+
+input[type="color"] {
+    width: 80px;
+    height: 35px;
+    padding: 0;
+    cursor: pointer;
+}
+
+.team-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.team-buttons button {
+    padding: 5px 10px;
+    cursor: pointer;
+    background-color: #f4f4f4;
+    border: 1px solid #999;
+}
+
+#wait-time, #server-message {
+    text-align: center;
+    min-height: 20px;
+}

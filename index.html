@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Iut War</title>
+    <link rel="stylesheet" href="style.css">
+
+<body>
+    <header class="test">
+        <h1>Pixel Iut War</h1>
+    </header>
+    <div class="main-container">
+        <div id="pixel-grid"></div>
+        <div class="controls">
+            <div class="panel">
+                <div class="panel-header">Identification obligatoire</div>
+                <input type="text" id="uid" placeholder="Entrez votre UID">
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header">Choisir une couleur</div>
+                <input type="color" id="color" value="#ffffff">
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">Temps d'attente avant modification</div>
+                <div id="wait-time">Vous pouvez modifier un pixel</div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">Choisir votre équipe :</div>
+                <div class="team-buttons">
+                    <button onclick="choisirEquipe(1)">Equipe 1</button>
+                    <button onclick="choisirEquipe(2)">Equipe 2</button>
+                    <button onclick="choisirEquipe(3)">Equipe 3</button>
+                    <button onclick="choisirEquipe(4)">Equipe 4</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">Dernière information retournée par le serveur :</div>
+                <div id="server-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = 'https://pixel-api.codenestedu.fr';
+
+        async function recupererTableauPixels() {
+            try {
+                const reponse = await fetch(`${baseUrl}/tableau`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!reponse.ok) throw new Error(reponse.status);
+                const tableauPixels = await reponse.json();
+                afficherGrille(tableauPixels);
+            } catch (erreur) {
+                afficherMessage("Erreur de récupération du tableau", true);
+            }
+        }
+
+        function afficherGrille(tableau) {
+            const gridContainer = document.getElementById('pixel-grid');            
+            gridContainer.innerHTML = ''; 
+            if (!tableau || tableau.length === 0) return;
+            
+            const nbLignes = tableau.length;
+            const nbColonnes = tableau[0].length;
+            
+            gridContainer.style.gridTemplateColumns = `repeat(${nbColonnes}, 1fr)`;
+            gridContainer.style.gridTemplateRows = `repeat(${nbLignes}, 1fr)`;
+            
+            for (let i = 0; i < nbLignes; i++) {
+                for (let j = 0; j < nbColonnes; j++) {
+                    const pixelDiv = document.createElement('div');
+                    pixelDiv.classList.add('pixel');
+                    pixelDiv.style.backgroundColor = tableau[i][j] || '#000000';
+                    pixelDiv.addEventListener('click', () => modifierPixel(i, j));
+                    gridContainer.appendChild(pixelDiv);
+                }
+            }
+        }
+
+        async function modifierPixel(row, col) {
+            const uid = document.getElementById('uid').value;
+            const color = document.getElementById('color').value;
+            
+            if (!uid) {
+                afficherMessage("Veuillez entrer un UID", true);
+                return;
+            }
+
+            try {
+                const reponse = await fetch(`${baseUrl}/modifier-case`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ color, uid, col, row })
+                });
+                const data = await reponse.json();
+                afficherMessage(data.msg);
+                if (reponse.ok) recupererTableauPixels();
+            } catch (erreur) {
+                afficherMessage("Erreur réseau lors de la modification", true);
+            }
+        }
+
+        async function choisirEquipe(nouvelleEquipe) {
+            const uid = document.getElementById('uid').value;
+            if (!uid) {
+                afficherMessage("Veuillez entrer un UID", true);
+                return;
+            }
+
+            try {
+                const reponse = await fetch(`${baseUrl}/choisir-equipe`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid, nouvelleEquipe })
+                });
+                const data = await reponse.json();
+                afficherMessage(data.msg);
+            } catch (erreur) {
+                afficherMessage("Erreur réseau lors du choix d'équipe", true);
+            }
+        }
+
+        async function verifierTempsAttente() {
+            const uid = document.getElementById('uid').value;
+            const waitTimeDiv = document.getElementById('wait-time');
+            if (!uid) return;
+
+            try {
+                const reponse = await fetch(`${baseUrl}/temps-attente?uid=${uid}`);
+                if (reponse.ok) {
+                    const data = await reponse.json();
+                    if (data.tempsAttente > 0) {
+                        waitTimeDiv.textContent = `Veuillez patienter ${data.tempsAttente} secondes`;
+                    } else {
+                        waitTimeDiv.textContent = "Vous pouvez modifier un pixel";
+                    }
+                }
+            } catch (erreur) {}
+        }
+
+        function afficherMessage(msg, isError = false) {
+            const msgDiv = document.getElementById('server-message');
+            msgDiv.textContent = msg;
+            msgDiv.style.color = isError ? 'red' : 'black';
+        }
+
+        recupererTableauPixels();
+        setInterval(recupererTableauPixels, 5000);
+        setInterval(verifierTempsAttente, 1000);
+    </script>
+</body>
+</html>
